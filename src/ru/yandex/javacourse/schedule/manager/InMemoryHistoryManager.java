@@ -32,11 +32,11 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-  public void clear() {
-    for (int id : myHashMap.keySet()) {
-      removeNode(myHashMap.get(id));
+    public void clear() {
+        for (int id : myHashMap.keySet()) {
+            removeNode(myHashMap.get(id));
         }
-    myHashMap.clear();
+        myHashMap.clear();
     }
 
     @Override

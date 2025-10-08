@@ -9,6 +9,6 @@ public class Node {
 
     Node(Task task) {
 
-		this.task = task;
+        this.task = task;
     }
 }

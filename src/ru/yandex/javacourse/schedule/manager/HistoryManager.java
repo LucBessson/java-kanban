@@ -1,8 +1,8 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import java.util.List;
-
 import ru.yandex.javacourse.schedule.tasks.Task;
+
+import java.util.List;
 
 /**
  * History manager.
@@ -10,13 +10,13 @@ import ru.yandex.javacourse.schedule.tasks.Task;
  * @author Vladimir Ivanov (ivanov.vladimir.l@gmail.com)
  */
 public interface HistoryManager {
-	List<Task> getHistory();
+    List<Task> getHistory();
 
 
-	void remove(int id);
+    void remove(int id);
 
-	void addTask(Task task);
+    void addTask(Task task);
 
 
-	void clear();
+    void clear();
 }
