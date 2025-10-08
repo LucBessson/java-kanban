@@ -35,9 +35,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
 	}
 
-	public void clear(){
+	public void clear() {
 
-		for(int id : myHashMap.keySet() ){
+		for (int id : myHashMap.keySet()) {
 
 			removeNode(myHashMap.get(id));
 
@@ -58,14 +58,14 @@ public class InMemoryHistoryManager implements HistoryManager {
 		//history.add(task);
 		int id = task.getId();
 		Node node = myLinkedList.linkLast(task);
-		if(myHashMap.containsKey(id)) removeNode(myHashMap.get(id));
+		if (myHashMap.containsKey(id)) removeNode(myHashMap.get(id));
 		myHashMap.put(id, node);
 
 
 	}
 
 
-	private  void removeNode(Node node){
+	private  void removeNode(Node node) {
 
 		if (node == null) {
 			return;
