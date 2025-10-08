@@ -28,7 +28,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 	@Override
 	public void remove(int id) {
 
-		if(myHashMap.containsKey(id)) {
+		if (myHashMap.containsKey(id)) {
 			removeNode(myHashMap.get(id));
 			myHashMap.remove(id);
 		}
