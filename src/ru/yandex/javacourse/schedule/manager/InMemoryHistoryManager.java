@@ -9,6 +9,7 @@ import java.util.List;
  * In-memory history manager.
  *
  * @author Vladimir Ivanov
+ * @noinspection checkstyle:Indentation
  */
 public class InMemoryHistoryManager implements HistoryManager {
 
@@ -30,10 +31,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             myHashMap.remove(id);
         }
     }
-
-    /**
-     * @noinspection checkstyle:Indentation
-     */
   public void clear() {
     for (int id : myHashMap.keySet()) {
       removeNode(myHashMap.get(id));
