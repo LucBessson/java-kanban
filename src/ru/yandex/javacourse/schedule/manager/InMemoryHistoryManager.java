@@ -77,53 +77,16 @@ public class InMemoryHistoryManager implements HistoryManager {
 
 
 
-		if(prevNode == null){
+		if (prevNode == null) {
 			myLinkedList.first = nextNode;
 		} else prevNode.next = nextNode;
 
-		if(nextNode == null){
+		if (nextNode == null) {
 			myLinkedList.last = prevNode;
 		} else nextNode.prev = prevNode;
 
 
 	}
-}
-
-class MyLinkedList {
-
-	Node first;
-
-	Node last;
-
-
-	public Node linkLast(Task task) {
-		Node newNode = new Node(task);
-
-
-		if (last == null) {
-			first = newNode;
-		} else {
-			last.next = newNode;
-			newNode.prev = last;
-		}
-		last = newNode;
-		return newNode;
-	}
-
-	public List<Task> getTasks() {
-		List<Task> tasks = new ArrayList<>();
-		Node current = first;
-
-		while (current != null) {
-			tasks.add(current.task);
-			current = current.next;
-		}
-
-		return tasks;
-	}
-
-
-
 }
 
 
