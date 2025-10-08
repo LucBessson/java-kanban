@@ -29,18 +29,19 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    public void clear() {
-        for (int id : myHashMap.keySet()) {
-            removeNode(myHashMap.get(id));
-        }
+    /** @noinspection checkstyle:Indentation*/
+	public void clear() {
+    for (int id : myHashMap.keySet()) {
+         removeNode(myHashMap.get(id));
+    }
         myHashMap.clear();
     }
 
     @Override
     public void addTask(Task task) {
-        if (task == null) {
-            return;
-        }
+    if (task == null) {
+      return;
+    }
 
         int id = task.getId();
 
