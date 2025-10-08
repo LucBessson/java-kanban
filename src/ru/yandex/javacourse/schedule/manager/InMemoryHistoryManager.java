@@ -31,6 +31,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             myHashMap.remove(id);
         }
     }
+
   public void clear() {
     for (int id : myHashMap.keySet()) {
       removeNode(myHashMap.get(id));
