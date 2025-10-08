@@ -29,7 +29,6 @@ public class Task {
     public void setInManager() {
         this.isInManager = true;
     }
-
   public int getId() {
 		return id;
     }
