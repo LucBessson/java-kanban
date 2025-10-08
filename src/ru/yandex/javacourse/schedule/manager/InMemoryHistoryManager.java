@@ -20,8 +20,10 @@ public class InMemoryHistoryManager implements HistoryManager {
         return myLinkedList.getTasks();
     }
 
-    /** @noinspection checkstyle:Indentation*/
-	@Override
+    /**
+     * @noinspection checkstyle:Indentation
+     */
+    @Override
     public void remove(int id) {
         if (myHashMap.containsKey(id)) {
             removeNode(myHashMap.get(id));
@@ -29,25 +31,26 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    /** @noinspection checkstyle:Indentation*/
-	public void clear() {
+    /**
+     * @noinspection checkstyle:Indentation
+     */
+  public void clear() {
     for (int id : myHashMap.keySet()) {
-         removeNode(myHashMap.get(id));
-    }
-        myHashMap.clear();
+      removeNode(myHashMap.get(id));
+        }
+    myHashMap.clear();
     }
 
     @Override
     public void addTask(Task task) {
-    if (task == null) {
-      return;
-    }
+        if (task == null) {
+            return;
+        }
 
         int id = task.getId();
-
-        if (myHashMap.containsKey(id)) removeNode(myHashMap.get(id));
-
-
+        if (myHashMap.containsKey(id)) {
+            removeNode(myHashMap.get(id));
+        }
         Node node = myLinkedList.linkLast(task);
         myHashMap.put(id, node);
     }
