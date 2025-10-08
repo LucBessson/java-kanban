@@ -1,10 +1,9 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import java.util.ArrayList;
+import ru.yandex.javacourse.schedule.tasks.Task;
+
 import java.util.HashMap;
 import java.util.List;
-
-import ru.yandex.javacourse.schedule.tasks.Task;
 
 /**
  * In-memory history manager.
@@ -13,65 +12,66 @@ import ru.yandex.javacourse.schedule.tasks.Task;
  */
 public class InMemoryHistoryManager implements HistoryManager {
 
-	private final MyLinkedList myLinkedList = new MyLinkedList();
-	private final HashMap<Integer, Node> myHashMap = new HashMap<>();
+    private final MyLinkedList myLinkedList = new MyLinkedList();
+    private final HashMap<Integer, Node> myHashMap = new HashMap<>();
 
+    @Override
+    public List<Task> getHistory() {
+        return myLinkedList.getTasks();
+    }
+
+    /** @noinspection checkstyle:Indentation*/
 	@Override
-	public List<Task> getHistory() {
-		return myLinkedList.getTasks();
-	}
+    public void remove(int id) {
+        if (myHashMap.containsKey(id)) {
+            removeNode(myHashMap.get(id));
+            myHashMap.remove(id);
+        }
+    }
 
-	@Override
-	public void remove(int id) {
-		if (myHashMap.containsKey(id)) {
-			removeNode(myHashMap.get(id));
-			myHashMap.remove(id);
-		}
-	}
+    public void clear() {
+        for (int id : myHashMap.keySet()) {
+            removeNode(myHashMap.get(id));
+        }
+        myHashMap.clear();
+    }
 
-	public void clear() {
-		for (int id : myHashMap.keySet()) {
-			removeNode(myHashMap.get(id));
-		}
-		myHashMap.clear();
-	}
+    @Override
+    public void addTask(Task task) {
+        if (task == null) {
+            return;
+        }
 
-	@Override
-	public void addTask(Task task) {
-		if (task == null) {
-			return;
-		}
+        int id = task.getId();
 
-		int id = task.getId();
+        if (myHashMap.containsKey(id)) {
+            removeNode(myHashMap.get(id));
+        }
 
-		if (myHashMap.containsKey(id)) {
-			removeNode(myHashMap.get(id));
-		}
+        Node node = myLinkedList.linkLast(task);
+        myHashMap.put(id, node);
+    }
 
-		Node node = myLinkedList.linkLast(task);
-		myHashMap.put(id, node);
-	}
+    private void removeNode(Node node) {
+        if (node == null) {
+            return;
+        }
 
-	private void removeNode(Node node) {
-		if (node == null) {
-			return;
-		}
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
 
-		Node prevNode = node.prev;
-		Node nextNode = node.next;
+        if (prevNode == null) {
+            myLinkedList.first = nextNode;
+        } else {
+            prevNode.next = nextNode;
+        }
 
-		if (prevNode == null) {
-			myLinkedList.first = nextNode;
-		} else {
-			prevNode.next = nextNode;
-		}
-
-		if (nextNode == null) {
-			myLinkedList.last = prevNode;
-		} else {
-			nextNode.prev = prevNode;
-		}
-	}
+        if (nextNode == null) {
+            myLinkedList.last = prevNode;
+        } else {
+            nextNode.prev = prevNode;
+        }
+    }
 
 
 }
