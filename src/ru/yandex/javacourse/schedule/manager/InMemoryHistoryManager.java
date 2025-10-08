@@ -30,7 +30,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     public void clear() {
-        for (int id : myHashMap.keySet()) {
+        for (int id : myHashMap.keySet())
+		{
             removeNode(myHashMap.get(id));
         }
         myHashMap.clear();
@@ -44,7 +45,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         int id = task.getId();
 
-        if (myHashMap.containsKey(id)) {
+        if (myHashMap.containsKey(id))
+		{
             removeNode(myHashMap.get(id));
         }
 
