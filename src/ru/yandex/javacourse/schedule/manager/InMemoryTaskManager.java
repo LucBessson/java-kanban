@@ -14,7 +14,6 @@ import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
 public class InMemoryTaskManager implements TaskManager {
-
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, Subtask> subtasks = new HashMap<>();
@@ -85,7 +84,6 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setId(id);
         epics.put(id, epic);
         return id;
-
     }
 
     @Override
@@ -138,7 +136,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTask(int id) {
-
         tasks.remove(id);
         historyManager.remove(id);
     }
@@ -167,10 +164,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTasks() {
-
         tasks.clear();
         historyManager.clear();
-
     }
 
     @Override
@@ -179,13 +174,22 @@ public class InMemoryTaskManager implements TaskManager {
             epic.cleanSubtaskIds();
             updateEpicStatus(epic.getId());
         }
+        for (int id : subtasks.keySet()) {
+            deleteSubtask(id);
+        }
         subtasks.clear();
     }
 
     @Override
     public void deleteEpics() {
-        epics.clear();
+        for (int id : epics.keySet()) {
+            deleteEpic(id);
+        }
+        for (int id : subtasks.keySet()) {
+            deleteSubtask(id);
+        }
         subtasks.clear();
+        epics.clear();
     }
 
     @Override
@@ -207,9 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
                 status = subtask.getStatus();
                 continue;
             }
-
-            if (status == subtask.getStatus()
-                    && status != IN_PROGRESS) {
+            if (status == subtask.getStatus() && status != IN_PROGRESS) {
                 continue;
             }
             epic.setStatus(IN_PROGRESS);
