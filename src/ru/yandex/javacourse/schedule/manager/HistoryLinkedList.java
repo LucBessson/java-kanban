@@ -75,6 +75,7 @@ public class HistoryLinkedList {
         Task task;
         Node prev;
         Node next;
+
         Node(Task task) {
             this.task = task;
         }
