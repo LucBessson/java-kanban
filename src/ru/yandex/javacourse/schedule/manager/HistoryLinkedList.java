@@ -17,9 +17,7 @@ public class HistoryLinkedList {
             return;
         }
         int id = task.getId();
-        if (nodeMap.containsKey(id)) {
-            remove(id);
-        }
+        remove(id);
         Node newNode = linkLast(task);
         nodeMap.put(id, newNode);
     }
