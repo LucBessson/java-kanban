@@ -12,7 +12,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryTaskManagerTest {
-
     TaskManager manager;
 
     @BeforeEach
@@ -89,10 +88,6 @@ public class InMemoryTaskManagerTest {
         assertFalse(epicSubsAfter.contains(subtask), "subtask should be deleted");
     }
 
-
-
-
-
     @Test
     void deleteEpicRemovesSubtasks() {
 
@@ -107,29 +102,75 @@ public class InMemoryTaskManagerTest {
         assertFalse(manager.getSubtasks().contains(subtask), "subtask not deleted");
     }
 
-
-
-
-
     @Test
     void changingTaskIdAfterAddLeadsToInconsistency() {
-        Task task = new Task("Mutable", "desc", TaskStatus.NEW);
+        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
         int assigned = manager.addNewTask(task);
-
-        assertEquals(assigned, task.getId(), "ID after added same as assigned");
-
-
+        assertEquals(assigned, task.getId(), "ID after added should same as assigned");
         task.setId(999);
-
+        assertEquals(assigned, task.getId(), "ID after added should not be changed");
         Task OldTaskId = manager.getTask(assigned); // менеджер по-прежнему хранит объект в map по ключу assigned
         assertEquals(assigned, OldTaskId.getId(), "task ID differences from key");
-
     }
 
+    @Test
+    void epicStatusUpdatesCorrectly() {
+        Epic epic = new Epic("Epic", "Testing epic 1");
+        int epicId = manager.addNewEpic(epic);
 
+        Subtask s1 = new Subtask("subTask1", "Testing subTask 1", TaskStatus.NEW, epicId);
+        Subtask s2 = new Subtask("subTask2", "Testing subTask 2", TaskStatus.NEW, epicId);
+        manager.addNewSubtask(s1);
+        manager.addNewSubtask(s2);
 
+        assertEquals(TaskStatus.NEW, manager.getEpic(epicId).getStatus());
 
+        s1.setStatus(TaskStatus.DONE);
+        manager.updateSubtask(s1);
+        assertEquals(TaskStatus.IN_PROGRESS, manager.getEpic(epicId).getStatus());
 
+        s2.setStatus(TaskStatus.DONE);
+        manager.updateSubtask(s2);
+        assertEquals(TaskStatus.DONE, manager.getEpic(epicId).getStatus());
+    }
 
+    @Test
+    void clearTasksAlsoClearsHistory() {
+        Task t1 = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+        Task t2 = new Task("Test 2", "Testing task 2", TaskStatus.NEW);
+        manager.addNewTask(t1);
+        manager.addNewTask(t2);
 
+        manager.getTask(t1.getId());
+        manager.getTask(t2.getId());
+        assertEquals(2, manager.getHistory().size(), "History not added");
+
+        manager.deleteTasks();
+        assertTrue(manager.getTasks().isEmpty(), "Tasks not cleared");
+        assertTrue(manager.getHistory().isEmpty(), "History not cleared");
+    }
+
+    @Test
+    void epicSubtasksListClearsCorrectlyAfterDeletion() {
+        Epic epic = new Epic("epic", "Testing epic 1");
+        int epicId = manager.addNewEpic(epic);
+        Subtask s = new Subtask("subTask", "Testing subTask 1", TaskStatus.NEW, epicId);
+        int subId = manager.addNewSubtask(s);
+
+        manager.deleteSubtask(subId);
+        Epic updatedEpic = manager.getEpic(epicId);
+        assertTrue(updatedEpic.getSubtaskIds().isEmpty(), "Epic still holds deleted subtask id");
+    }
+
+    @Test
+    void changingFieldsAfterAddDoesNotCorruptManager() {
+        Task task = new Task("Task 1", "Testing Task 1", TaskStatus.NEW);
+        int id = manager.addNewTask(task);
+        task.setName("Changed");
+        task.setDescription("New Task 1");
+
+        Task stored = manager.getTask(id);
+        assertEquals("Changed", stored.getName(), "Manager should reflect changed name");
+        assertEquals("New Task 1", stored.getDescription(), "Manager should reflect changed desc");
+    }
 }
