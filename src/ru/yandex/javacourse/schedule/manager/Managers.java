@@ -1,7 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import java.io.File;
-
 /**
  * Default managers.
  *
