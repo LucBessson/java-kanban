@@ -4,14 +4,11 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.manager.Managers;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SubtaskTest {
-
     @Test
-    public void testEqualityById(){
+    public void testEqualityById() {
         Subtask s0 = new Subtask(1, "Test 1", "Testing task 1", TaskStatus.NEW, 1);
         Subtask s1 = new Subtask(1, "Test 2", "Testing task 2", TaskStatus.IN_PROGRESS, 2);
         assertEquals(s0, s1, "task entities should be compared by id");
@@ -27,7 +24,6 @@ public class SubtaskTest {
         assertNotEquals(subtask.id, subtask.epicId, "subtask cannot be attached to itself");
     }
 
-
     @Test
     public void testSubtaskNotAddedWithoutEpic() {
         TaskManager manager = Managers.getDefault();
@@ -35,9 +31,6 @@ public class SubtaskTest {
         Integer id = manager.addNewSubtask(subtask);
         assertNull(id, "subtask should not be added without Epic");
     }
-
-
-
 
 
 }
