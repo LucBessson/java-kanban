@@ -10,12 +10,18 @@ public class Epic extends Task {
 
     public Epic(int id, String name, String description) {
         super(id, name, description, NEW);
+        this.type = TaskType.epic;
     }
 
     public Epic(String name, String description) {
         super(name, description, NEW);
+        this.type = TaskType.epic;
     }
 
+    public Epic(int id, String name, String description, TaskStatus status) {
+        super(id, name, description, status);
+        this.type = TaskType.epic;
+    }
     public void addSubtaskId(int id) {
         if (!subtaskIds.contains(id) && id != this.id) {
             subtaskIds.add(id);

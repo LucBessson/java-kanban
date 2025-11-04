@@ -5,11 +5,8 @@ import ru.yandex.javacourse.schedule.manager.TaskManager;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
-
 import java.util.List;
-
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
-
 
 public class Main {
     public static void main(String[] args) {
@@ -110,10 +107,6 @@ public class Main {
         for (Task task : manager.getHistory()) {
             System.out.println(task);
         }
-
-
-
-
  */
 
         TaskManager manager = Managers.getDefault();
@@ -177,7 +170,10 @@ public class Main {
             }
         }
         System.out.println();
+
+
+
+
+
     }
-
-
 }

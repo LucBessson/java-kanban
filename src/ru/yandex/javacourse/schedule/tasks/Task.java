@@ -6,7 +6,9 @@ public class Task {
 
     protected int id = 0;
     protected String name;
+
     protected TaskStatus status;
+    protected TaskType type;
     protected String description;
     private boolean isInManager = false;
 
@@ -16,6 +18,7 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.type = TaskType.task;
     }
 
 
@@ -23,7 +26,22 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.type = TaskType.task;
+
     }
+
+
+    public String toFileString() {
+        String[] line = new String[] {
+                String.valueOf(id),
+                String.valueOf(type),
+                name,
+                String.valueOf(status),
+                description
+        };
+        return String.join(",", line);
+    }
+
 
 
     public void setInManager() {
