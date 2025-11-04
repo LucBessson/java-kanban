@@ -1,13 +1,34 @@
 package ru.yandex.javacourse.schedule.manager;
 
 import ru.yandex.javacourse.schedule.tasks.*;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final String fileHead = "id,type,name,status,description,epic";
-    private final   String fileName;
+    private final String fileName;
+
+    public FileBackedTaskManager(String fileName) {
+        super();
+        this.fileName = fileName;
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String head = br.readLine();
+            if (head == null) {
+                return;
+            }
+            if (br.ready() && !head.equals(fileHead)) {
+                throw new IOException("Неверный заголовок файла");
+            }
+            while (br.ready()) {
+                String line = br.readLine();
+                fromFileString(line);
+            }
+        } catch (IOException e) {
+            System.out.println("Произошла ошибка во время чтения файла.");
+        }
+    }
 
     public static void main(String[] args) {
         String fileName = "tasks.csv"; // файл сохранения
@@ -47,26 +68,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println("Подзадачи совпадают: " + subsEqual);
     }
 
-    public FileBackedTaskManager(String fileName) {
-        super();
-        this.fileName = fileName;
-        try(BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String head = br.readLine();
-            if (head == null) {
-                return;
-            }
-            if(br.ready() && ! head.equals(fileHead)) {
-                throw new IOException("Неверный заголовок файла");
-            }
-            while (br.ready()) {
-                String line = br.readLine();
-                fromFileString(line);
-            }
-        } catch (IOException e) {
-            System.out.println("Произошла ошибка во время чтения файла.");
-        }
-    }
-
     public int fromFileString(String line) {
         String[] lines = line.split(",");
         int id = Integer.parseInt(lines[0]);
@@ -102,17 +103,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
         return subtaskId;
     }
+
     @Override
     public int addNewTask(Task task) {
         int taskId = super.addNewTask(task);
         save();
         return taskId;
     }
+
     public int addNewEpic(Epic epic) {
         int epicId = super.addNewEpic(epic);
         save();
         return epicId;
     }
+
     private void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             writer.write(fileHead + "\n");
@@ -130,7 +134,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void save(Task task) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-                writer.write(task.toFileString() + "\n");
+            writer.write(task.toFileString() + "\n");
         } catch (IOException e) {
             System.out.println("Произошла ошибка во время записи файла.");
         }
