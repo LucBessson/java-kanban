@@ -93,6 +93,7 @@ public class InMemoryTaskManager implements TaskManager {
         epics.put(id, epic);
         return id;
     }
+
     protected int addOldEpic(Epic epic) {
         int id = epic.getId();
         epic.setInManager();
@@ -115,6 +116,7 @@ public class InMemoryTaskManager implements TaskManager {
         updateEpicStatus(epicId);
         return id;
     }
+
     public Integer addOldSubtask(Subtask subtask) {
         final int epicId = subtask.getEpicId();
         Epic epic = epics.get(epicId);
