@@ -22,6 +22,7 @@ public class Epic extends Task {
         super(id, name, description, status);
         this.type = TaskType.epic;
     }
+
     public void addSubtaskId(int id) {
         if (!subtaskIds.contains(id) && id != this.id) {
             subtaskIds.add(id);
@@ -42,12 +43,6 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", status=" + status +
-                ", description='" + description + '\'' +
-                ", subtaskIds=" + subtaskIds +
-                '}';
+        return "Epic{" + "id=" + id + ", name='" + name + '\'' + ", status=" + status + ", description='" + description + '\'' + ", subtaskIds=" + subtaskIds + '}';
     }
 }

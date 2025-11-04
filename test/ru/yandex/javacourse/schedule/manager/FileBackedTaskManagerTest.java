@@ -2,15 +2,22 @@ package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.tasks.*;
+import ru.yandex.javacourse.schedule.tasks.Epic;
+import ru.yandex.javacourse.schedule.tasks.Subtask;
+import ru.yandex.javacourse.schedule.tasks.Task;
+import ru.yandex.javacourse.schedule.tasks.TaskStatus;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FileBackedTaskManagerTest {
     private File tempFile;
     private FileBackedTaskManager manager;
+
     @BeforeEach
     void setUp() throws IOException {
         // создаём временный файл и инициализируем менеджер
@@ -79,7 +86,6 @@ class FileBackedTaskManagerTest {
         assertEquals(TaskStatus.DONE, loadedSub.getStatus());
     }
 
-
     @Test
     void shouldRewriteFileWithoutDuplicates() throws IOException {
         File tempFile = File.createTempFile("rewrite", ".csv");
@@ -108,6 +114,7 @@ class FileBackedTaskManagerTest {
         // Проверяем, что файл реально был перезаписан, а не просто дописан
         assertTrue(fileSizeAfterSecondSave > fileSizeAfterFirstSave, "Файл должен обновляться, а не дублироваться");
     }
+
     @Test
     void shouldNotDuplicateDataAfterMultipleSaves() {
         // создаём задачи разных типов
