@@ -1,13 +1,10 @@
 package ru.yandex.javacourse.schedule.tasks;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.manager.Managers;
-import ru.yandex.javacourse.schedule.manager.TaskManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EpicTest {
-
     @Test
     public void testEqualityById() {
         Epic e0 = new Epic(1, "Test 1", "Testing task 1");

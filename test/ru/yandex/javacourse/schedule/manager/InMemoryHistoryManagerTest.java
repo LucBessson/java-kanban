@@ -4,18 +4,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 public class InMemoryHistoryManagerTest {
     HistoryManager historyManager;
 
     @BeforeEach
-    public void initHistoryManager(){
+    public void initHistoryManager() {
         historyManager = Managers.getDefaultHistory();
     }
 
     @Test
-    public void testHistoricVersions(){
+    public void testHistoricVersions() {
         Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
         historyManager.addTask(task);
         assertEquals(1, historyManager.getHistory().size(), "historic task should be added");
@@ -25,7 +28,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void testHistoricVersionsByPointer(){
+    public void testHistoricVersionsByPointer() {
         Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
         historyManager.addTask(task);
         assertEquals(task.getStatus(), historyManager.getHistory().get(0).getStatus(), "historic task should be stored");
@@ -62,7 +65,7 @@ public class InMemoryHistoryManagerTest {
         assertFalse(history.contains(task2), "Task has not removed");
         // clear
         historyManager.clear();
-        assertTrue(historyManager.getHistory().isEmpty(),"History manager is not empty");
+        assertTrue(historyManager.getHistory().isEmpty(), "History manager is not empty");
     }
 
     @Test
