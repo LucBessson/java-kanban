@@ -1,5 +1,8 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Subtask extends Task {
     protected int epicId;
 
@@ -8,6 +11,12 @@ public class Subtask extends Task {
         this.epicId = epicId;
         this.type = TaskType.subTask;
 
+    }
+
+    public Subtask(int id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration, int epicId){
+        this(id, name, description, status, epicId);
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public Subtask(String name, String description, TaskStatus status, int epicId) {

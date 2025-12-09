@@ -18,76 +18,86 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void testHistoricVersions() {
-        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
-        historyManager.addTask(task);
-        assertEquals(1, historyManager.getHistory().size(), "historic task should be added");
-        task.setStatus(TaskStatus.IN_PROGRESS);
-        historyManager.addTask(task);
-        assertEquals(1, historyManager.getHistory().size(), "historic task should not be added");
+    void shouldReturnEmptyListForEmptyHistory() {
+        assertTrue(historyManager.getHistory().isEmpty(), "История должна быть пустой по умолчанию.");
     }
 
     @Test
-    public void testHistoricVersionsByPointer() {
-        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
-        historyManager.addTask(task);
-        assertEquals(task.getStatus(), historyManager.getHistory().get(0).getStatus(), "historic task should be stored");
-        task.setStatus(TaskStatus.IN_PROGRESS);
-        historyManager.addTask(task);
-        assertEquals(TaskStatus.IN_PROGRESS, historyManager.getHistory().get(0).getStatus(), "historic task should be changed");
-    }
+    void addTaskShouldMoveToEndAndRemoveDuplicate() {
+        Task t1 = new Task(1, "Test 1", "D1", TaskStatus.NEW);
+        Task t2 = new Task(2, "Test 2", "D2", TaskStatus.NEW);
+        Task t3 = new Task(3, "Test 3", "D3", TaskStatus.NEW);
 
-    @Test
-    void addTaskMovesToEndAndNoDuplicates() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        historyManager.addTask(task1);
-        historyManager.addTask(task2);
-        historyManager.addTask(task1);
+        historyManager.addTask(t1);
+        historyManager.addTask(t2);
+        historyManager.addTask(t3);
+        historyManager.addTask(t1);
+
         List<Task> history = historyManager.getHistory();
-        assertEquals(2, history.size(), "Should not have duplicates");
-        assertEquals(2, history.get(0).getId(), "Task in wrong place");
-        assertEquals(1, history.get(1).getId(), "Task in wrong place");
+        assertEquals(3, history.size(), "Не должно быть дубликатов.");
+        assertEquals(t2, history.get(0), "t2 должно быть в начале.");
+        assertEquals(t1, history.get(2), "t1 должно быть в конце.");
     }
 
     @Test
-    void removeAndClearWorks() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
-        historyManager.addTask(task1);
-        historyManager.addTask(task2);
-        historyManager.addTask(task3);
-        // remove middle
+    void removeShouldHandleStartNode() {
+        Task t1 = new Task(1, "Test 1", "D1", TaskStatus.NEW);
+        Task t2 = new Task(2, "Test 2", "D2", TaskStatus.NEW);
+        historyManager.addTask(t1);
+        historyManager.addTask(t2); // [t1, t2]
+        historyManager.remove(1);
+
+        List<Task> history = historyManager.getHistory();
+        assertEquals(1, history.size());
+        assertEquals(t2, history.get(0), "t2 должно стать началом.");
+    }
+
+    @Test
+    void removeShouldHandleMiddleNode() {
+        Task t1 = new Task(1, "Test 1", "D1", TaskStatus.NEW);
+        Task t2 = new Task(2, "Test 2", "D2", TaskStatus.NEW);
+        Task t3 = new Task(3, "Test 3", "D3", TaskStatus.NEW);
+        historyManager.addTask(t1);
+        historyManager.addTask(t2);
+        historyManager.addTask(t3);
         historyManager.remove(2);
+
         List<Task> history = historyManager.getHistory();
-        assertEquals(2, history.size(), "Task has not removed");
-        assertFalse(history.contains(task2), "Task has not removed");
-        // clear
-        historyManager.clear();
-        assertTrue(historyManager.getHistory().isEmpty(), "History manager is not empty");
+        assertEquals(2, history.size());
+        assertEquals(t1, history.get(0));
+        assertEquals(t3, history.get(1), "t1 и t3 должны быть связаны.");
+    }
+
+    @Test
+    void removeShouldHandleEndNode() {
+        Task t1 = new Task(1, "Test 1", "D1", TaskStatus.NEW);
+        Task t2 = new Task(2, "Test 2", "D2", TaskStatus.NEW);
+        historyManager.addTask(t1);
+        historyManager.addTask(t2);
+
+        historyManager.remove(2);
+
+        List<Task> history = historyManager.getHistory();
+        assertEquals(1, history.size());
+        assertEquals(t1, history.get(0), "t1 должно стать концом.");
     }
 
     @Test
     void addNullIsIgnoredAndRemoveNonexistentDoesNothing() {
         historyManager.addTask(null);
-        assertTrue(historyManager.getHistory().isEmpty(), "null cant be added");
-        historyManager.remove(999);// removing not generate exception
+        assertTrue(historyManager.getHistory().isEmpty(), "null не должен быть добавлен.");
+
+        assertDoesNotThrow(() -> historyManager.remove(999), "Удаление несуществующего ID не должно бросать исключения.");
     }
 
     @Test
-    void linkedListIntegrityAfterRemovals() {
-        Task t1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task t2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task t3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+    void clearShouldEmptyHistory() {
+        Task t1 = new Task(1, "Test 1", "D1", TaskStatus.NEW);
         historyManager.addTask(t1);
-        historyManager.addTask(t2);
-        historyManager.addTask(t3);
-        historyManager.remove(2);
-        List<Task> history = historyManager.getHistory();
-        assertEquals(List.of(t1, t3), history, "Middle node must be removed correctly");
-        historyManager.remove(3);
-        historyManager.remove(1);
-        assertTrue(historyManager.getHistory().isEmpty(), "All nodes should be removed");
+        assertFalse(historyManager.getHistory().isEmpty());
+
+        historyManager.clear();
+
+        assertTrue(historyManager.getHistory().isEmpty(), "История должна быть очищена.");
     }
 }

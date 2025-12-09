@@ -5,6 +5,7 @@ import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Task manager.
@@ -13,6 +14,14 @@ import java.util.List;
  */
 public interface TaskManager {
     List<Task> getTasks();
+
+    //void updateEpicTime(Epic epic);
+
+    boolean hasAnyCrossing();
+
+    boolean isCrossing(Task task1, Task task2);
+
+    List<Task> getPrioritizedTasks();
 
     List<Subtask> getSubtasks();
 
@@ -25,6 +34,10 @@ public interface TaskManager {
     Subtask getSubtask(int id);
 
     Epic getEpic(int id);
+
+    Optional<Task> getOptionalTask(int id);
+    Optional<Subtask> getOptionalSubtask(int id);
+    Optional<Epic> getOptionalEpic(int id);
 
     int addNewTask(Task task);
 

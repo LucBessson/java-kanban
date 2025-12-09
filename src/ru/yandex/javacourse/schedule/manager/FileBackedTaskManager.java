@@ -3,11 +3,13 @@ package ru.yandex.javacourse.schedule.manager;
 import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    private final String fileHead = "id,type,name,status,description,epic";
+    private final String fileHead = "id,type,name,status,description,startTime,duration,endTime,epic";
     private final String fileName;
 
     public FileBackedTaskManager(String fileName) {
@@ -26,13 +28,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fromFileString(line);
             }
         } catch (IOException e) {
-            System.out.println("Произошла ошибка во время чтения файла.");
+            System.out.println(e.getMessage());
         }
     }
 
     public static void main(String[] args) {
-        String fileName = "tasks.csv"; // файл сохранения
-        FileBackedTaskManager manager = new FileBackedTaskManager(fileName);
+        String fileName = "timedTasks.csv"; // файл сохранения
+        FileBackedTaskManager manager = Managers.loadFromFile(fileName);
+
         // --- создаём задачи ---
         Task task1 = new Task("Покупки", "Купить продукты в магазине", TaskStatus.NEW);
         Task task2 = new Task("Учёба", "Сделать домашнее задание по Java", TaskStatus.IN_PROGRESS);
@@ -52,7 +55,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println("Эпики: " + manager.getEpics());
         System.out.println("Подзадачи: " + manager.getSubtasks());
         // --- загружаем новый менеджер из файла ---
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager(fileName);
+        FileBackedTaskManager loadedManager = Managers.loadFromFile(fileName);
         System.out.println("\n=== Менеджер, загруженный из файла ===");
         System.out.println("Задачи: " + loadedManager.getTasks());
         System.out.println("Эпики: " + loadedManager.getEpics());
@@ -67,7 +70,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println("Эпики совпадают: " + epicsEqual);
         System.out.println("Подзадачи совпадают: " + subsEqual);
     }
-
+    //fileHead = "0 id,1 type,2 name,3 status,4 description,5 startTime,6 duration,7 endTime,8 epic"
     public int fromFileString(String line) {
         String[] lines = line.split(",");
         int id = Integer.parseInt(lines[0]);
@@ -75,20 +78,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = lines[2];
         TaskStatus status = TaskStatus.valueOf(lines[3]);
         String description = lines[4];
-        switch (type) {
+        LocalDateTime startTime = lines[5].equals("???") ? null : LocalDateTime.parse(lines[5]);
+        Duration duration = lines[6].equals("???") ? null : Duration.ofMinutes(Long.parseLong(lines[6]));
+                switch (type) {
             case task: {
-                Task task = new Task(id, name, description, status);
+                Task task = new Task(id, name, description, status, startTime, duration);
                 super.addOldTask(task);
                 return id;
             }
             case epic: {
-                Epic epic = new Epic(id, name, description, status);
+                LocalDateTime endTime = lines[7].equals("???") ? null : LocalDateTime.parse(lines[7]);
+                Epic epic = new Epic(id, name, description, status, startTime, duration, endTime);
                 super.addOldEpic(epic);
                 return id;
             }
             case subTask: {
-                int epic = Integer.parseInt(lines[5]);
-                Subtask subtask = new Subtask(id, name, description, status, epic);
+                int epicId = Integer.parseInt(lines[8]);
+                Subtask subtask = new Subtask(id, name, description, status, startTime, duration, epicId);
                 super.addOldSubtask(subtask);
                 return id;
             }
@@ -128,7 +134,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 writer.write(value.toFileString() + "\n");
             }
         } catch (IOException e) {
-            System.out.println("Произошла ошибка во время записи файла.");
+            System.out.println("Произошла ошибка во время записи файла.\n" + e.getMessage());
+
         }
     }
 
