@@ -39,7 +39,7 @@ public class Epic extends Task {
     }
 
     @Override
-    public String toFileString(){
+    public String toFileString() {
         String end = (endTime != null) ? endTime.toString() : "???";
         String joined = String.join(",", super.toFileString(), end);
         return joined;
