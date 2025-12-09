@@ -122,7 +122,7 @@ public class Task {
     }
 
     public void setStartTime(LocalDateTime startTime) {
-        if(isInManager && type != TaskType.epic) throw new IllegalStateException("нельзя установить startTime, задача уже находится в менеджере");
+        if (isInManager && type != TaskType.epic) throw new IllegalStateException("нельзя установить startTime, задача уже находится в менеджере");
         this.startTime = startTime;
     }
 
