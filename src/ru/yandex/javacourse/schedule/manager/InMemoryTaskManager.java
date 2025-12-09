@@ -24,14 +24,12 @@ public class InMemoryTaskManager implements TaskManager {
     private void updateEpicTime(Epic epic) {
         timedTasks.remove(epic);
         List<Integer> subIds = epic.getSubtaskIds();
-
         if (subIds.isEmpty()) {
             epic.setDuration(Duration.ZERO);
             epic.setStartTime(null);
             epic.setEndTime(null);
             return;
         }
-
         List<Subtask> subs = subIds.stream()
                 .map(subtasks::get)
                 .toList();
@@ -40,46 +38,42 @@ public class InMemoryTaskManager implements TaskManager {
                 subs.stream()
                         .map(Subtask::getDuration)
                         .filter(Objects::nonNull)
-                        .reduce(Duration.ZERO, Duration::plus)
-        );
+                        .reduce(Duration.ZERO, Duration::plus));
 
         epic.setStartTime(
                 subs.stream()
                         .map(Subtask::getStartTime)
                         .filter(Objects::nonNull)
                         .min(LocalDateTime::compareTo)
-                        .orElse(null)
-        );
+                        .orElse(null));
 
         epic.setEndTime(
                 subs.stream()
                         .map(Subtask::getEndTime)
                         .filter(Objects::nonNull)
                         .max(LocalDateTime::compareTo)
-                        .orElse(null)
-        );
+                        .orElse(null));
 
         addToTimedTasks(epic);
     }
-
 
     public List<Task> getPrioritizedTasks() {
         return new ArrayList<>(timedTasks);
     }
 
     public boolean isCrossing(Task task1, Task task2) {
-        if (task1.getStartTime() == null || task1.getEndTime() == null) return false;
-        if (task2.getStartTime() == null || task2.getEndTime() == null) return false;
+        if (task1.getStartTime() == null || task1.getEndTime() == null)
+            return false;
+        if (task2.getStartTime() == null || task2.getEndTime() == null)
+            return false;
 
-        return task1.getStartTime().isBefore(task2.getEndTime()) &&
-                task2.getStartTime().isBefore(task1.getEndTime());
+        return task1.getStartTime().isBefore(task2.getEndTime()) && task2.getStartTime().isBefore(task1.getEndTime());
     }
 
     public boolean hasAnyCrossing() {
         List<Task> tasks = getPrioritizedTasks();
 
-        return IntStream.range(0, tasks.size() - 1)
-                .anyMatch(i -> isCrossing(tasks.get(i), tasks.get(i + 1)));
+        return IntStream.range(0, tasks.size() - 1).anyMatch(i -> isCrossing(tasks.get(i), tasks.get(i + 1)));
     }
 
     private void addToTimedTasks(Task task) {
@@ -87,8 +81,6 @@ public class InMemoryTaskManager implements TaskManager {
             timedTasks.add(task);
         }
     }
-
-
 
     @Override
     public ArrayList<Task> getTasks() {
@@ -112,9 +104,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return null;
         }
-        return epic.getSubtaskIds().stream()
-                .map(subtasks::get)
-                .collect(Collectors.toCollection(ArrayList::new));
+        return epic.getSubtaskIds().stream().map(subtasks::get).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -235,8 +225,6 @@ public class InMemoryTaskManager implements TaskManager {
         return id;
     }
 
-
-
     @Override
     public void updateTask(Task task) {
         final int id = task.getId();
@@ -283,11 +271,8 @@ public class InMemoryTaskManager implements TaskManager {
         timedTasks.remove(epic);
         historyManager.remove(id);
 
-        epic.getSubtaskIds().stream()
-                .peek(historyManager::remove)
-                .forEach(subtasks::remove);
+        epic.getSubtaskIds().stream().peek(historyManager::remove).forEach(subtasks::remove);
     }
-
 
     @Override
     public void deleteSubtask(int id) {
@@ -314,25 +299,20 @@ public class InMemoryTaskManager implements TaskManager {
                 .peek(Epic::cleanSubtaskIds)
                 .forEach(epic -> updateEpicStatus(epic.getId()));
 
-        new ArrayList<>(subtasks.keySet()).stream()
-                .forEach(this::deleteSubtask);
+        new ArrayList<>(subtasks.keySet()).stream().forEach(this::deleteSubtask);
 
         subtasks.clear();
     }
 
-
     @Override
     public void deleteEpics() {
-        new ArrayList<>(epics.keySet()).stream()
-                .forEach(this::deleteEpic);
+        new ArrayList<>(epics.keySet()).stream().forEach(this::deleteEpic);
 
-        new ArrayList<>(subtasks.keySet()).stream()
-                .forEach(this::deleteSubtask);
+        new ArrayList<>(subtasks.keySet()).stream().forEach(this::deleteSubtask);
 
         subtasks.clear();
         epics.clear();
     }
-
 
     @Override
     public List<Task> getHistory() {

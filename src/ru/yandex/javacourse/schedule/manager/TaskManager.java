@@ -36,7 +36,9 @@ public interface TaskManager {
     Epic getEpic(int id);
 
     Optional<Task> getOptionalTask(int id);
+
     Optional<Subtask> getOptionalSubtask(int id);
+
     Optional<Epic> getOptionalEpic(int id);
 
     int addNewTask(Task task);
