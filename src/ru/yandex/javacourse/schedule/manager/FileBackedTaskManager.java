@@ -70,7 +70,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println("Эпики совпадают: " + epicsEqual);
         System.out.println("Подзадачи совпадают: " + subsEqual);
     }
-    //fileHead = "0 id,1 type,2 name,3 status,4 description,5 startTime,6 duration,7 endTime,8 epic"
+
     public int fromFileString(String line) {
         String[] lines = line.split(",");
         int id = Integer.parseInt(lines[0]);
