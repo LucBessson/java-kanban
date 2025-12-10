@@ -8,6 +8,7 @@ import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.*;
@@ -144,68 +145,40 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldDetectCrossingWhenTask2StartsBeforeTask1Ends() {
-        Task task1 = new Task("T1", "D1", NEW);
-        task1.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0));
-        task1.setDuration(Duration.ofHours(2)); // [10:00 - 12:00]
+    void tasksShouldBeSortedByStartTimeThenById() {
+        InMemoryTaskManager manager = new InMemoryTaskManager();
 
-        Task task2 = new Task("T2", "D2", NEW);
-        task2.setStartTime(LocalDateTime.of(2025, 1, 1, 11, 0));
-        task2.setDuration(Duration.ofHours(2)); // [11:00 - 13:00]
+        Task t1 = new Task("A", "t1", TaskStatus.NEW);
+        t1.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0));
+        t1.setDuration(Duration.ofMinutes(30));
+
+        Task t2 = new Task("B", "t2", TaskStatus.NEW);
+        t2.setStartTime(LocalDateTime.of(2025, 1, 1, 9, 0));
+        t2.setDuration(Duration.ofMinutes(30));
+
+        Task t3 = new Task("C", "t3", TaskStatus.NEW);
+        t3.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0)); // same start as t1
+        t3.setDuration(Duration.ofMinutes(15));
+
+        int id2 = manager.addNewTask(t2); // earliest start (09:00) -> id 1
+        int id1 = manager.addNewTask(t1); // 10:00 -> id 2
+        int id3 = manager.addNewTask(t3); // 10:00 -> id 3
+
+        assertEquals(1, id2);
+        assertEquals(2, id1);
+        assertEquals(3, id3);
+
+        List<Task> sorted = manager.getPrioritizedTasks();
+
+        assertEquals(3, sorted.size());
 
 
-        manager.addNewTask(task1);
-        manager.addNewTask(task2);
+        // САМЫЙ РАННИЙ — 9:00 (t2)
+        assertEquals(t2.getId(), sorted.get(0).getId());
 
-        assertTrue(manager.isCrossing(task1, task2), "Интервалы [10:00-12:00] и [11:00-13:00] должны пересекаться.");
-    }
-
-    @Test
-    void shouldNotDetectCrossingWhenIntervalsAreSeparate() {
-        Task task1 = new Task("T1", "D1", NEW);
-        task1.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0));
-        task1.setDuration(Duration.ofHours(1)); // [10:00 - 11:00]
-
-        Task task2 = new Task("T2", "D2", NEW);
-        task2.setStartTime(LocalDateTime.of(2025, 1, 1, 11, 0).plusMinutes(1));
-        task2.setDuration(Duration.ofHours(1)); // [11:01 - 12:01]
-
-        manager.addNewTask(task1);
-        manager.addNewTask(task2);
-
-        assertFalse(manager.isCrossing(task1, task2), "Интервалы [10:00-11:00] и [11:01-12:01] не должны пересекаться.");
-    }
-
-    @Test
-    void shouldDetectCrossingWhenOneTaskIsContainedInAnother() {
-        Task task1 = new Task("T1", "D1", NEW);
-        task1.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0));
-        task1.setDuration(Duration.ofHours(4)); // [10:00 - 14:00]
-
-        Task task2 = new Task("T2", "D2", NEW);
-        task2.setStartTime(LocalDateTime.of(2025, 1, 1, 11, 0));
-        task2.setDuration(Duration.ofHours(1)); // [11:00 - 12:00]
-
-        manager.addNewTask(task1);
-        manager.addNewTask(task2);
-
-        assertTrue(manager.isCrossing(task1, task2), "Интервал [11:00-12:00] содержится в [10:00-14:00] и должен пересекаться.");
-    }
-
-    @Test
-    void shouldNotDetectCrossingAtStrictBoundary() {
-        Task task1 = new Task("T1", "D1", NEW);
-        task1.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0));
-        task1.setDuration(Duration.ofHours(1)); // [10:00 - 11:00]
-
-        Task task2 = new Task("T2", "D2", NEW);
-        task2.setStartTime(LocalDateTime.of(2025, 1, 1, 11, 0));
-        task2.setDuration(Duration.ofHours(1)); // [11:00 - 12:00]
-
-        manager.addNewTask(task1);
-        manager.addNewTask(task2);
-
-        assertFalse(manager.isCrossing(task1, task2), "Интервалы [10:00-11:00] и [11:00-12:00] не должны пересекаться (строгое неравенство).");
+        // Далее — 10:00. Между t1(id=2) и t3(id=3) сортировка должна идти по id.
+        assertEquals(t1.getId(), sorted.get(1).getId());
+        assertEquals(t3.getId(), sorted.get(2).getId());
     }
 
     @Test
@@ -229,18 +202,5 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.deleteTask(t2.getId());
         assertFalse(manager.hasAnyCrossing(), "Пересечений быть не должно.");
-    }
-
-    @Test
-    void shouldHandleNullTimeTasksInCrossingCheck() {
-        Task t1 = new Task("T1", "D1", NEW);
-        Task t2 = new Task("T2", "D2", NEW);
-        t2.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0));
-        t2.setDuration(Duration.ofHours(1));
-
-        manager.addNewTask(t1);
-        manager.addNewTask(t2);
-
-        assertFalse(manager.isCrossing(t1, t2), "Задачи без времени не должны пересекаться.");
     }
 }

@@ -15,11 +15,7 @@ import java.util.Optional;
 public interface TaskManager {
     List<Task> getTasks();
 
-    //void updateEpicTime(Epic epic);
-
     boolean hasAnyCrossing();
-
-    boolean isCrossing(Task task1, Task task2);
 
     List<Task> getPrioritizedTasks();
 
