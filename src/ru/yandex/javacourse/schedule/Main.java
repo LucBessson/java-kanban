@@ -136,15 +136,15 @@ public class Main {
         System.out.println();
 
         // Запрашиваем задачи в разном порядке и проверяем историю
-        manager.getTask(task1Id);
-        manager.getEpic(epic1Id);
-        manager.getSubtask(sub2Id);
-        manager.getSubtask(sub3Id);
-        manager.getEpic(epic2Id);
-        manager.getTask(task2Id);
-        manager.getSubtask(sub1Id);
-        manager.getEpic(epic1Id); // повторный запрос
-        manager.getTask(task1Id); // повторный запрос
+        manager.getOptionalTask(task1Id);
+        manager.getOptionalEpic(epic1Id);
+        manager.getOptionalSubtask(sub2Id);
+        manager.getOptionalSubtask(sub3Id);
+        manager.getOptionalEpic(epic2Id);
+        manager.getOptionalTask(task2Id);
+        manager.getOptionalSubtask(sub1Id);
+        manager.getOptionalEpic(epic1Id); // повторный запрос
+        manager.getOptionalTask(task1Id); // повторный запрос
 
         printHistory(manager.getHistory(), "История после запросов в разном порядке");
 
@@ -170,10 +170,5 @@ public class Main {
             }
         }
         System.out.println();
-
-
-
-
-
     }
 }
