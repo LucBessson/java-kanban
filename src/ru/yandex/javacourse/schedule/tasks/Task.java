@@ -22,13 +22,16 @@ public class Task {
         this.type = TaskType.task;
     }
 
-    public Task(int id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
-        this(id, name, description, status);
+    public Task(String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
+        this(name, description, status);
         this.startTime = startTime;
         this.duration = duration;
     }
 
-
+    public Task(int id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
+        this(name, description, status, startTime, duration);
+        this.id = id;
+    }
 
     public Task(String name, String description, TaskStatus status) {
         this.name = name;

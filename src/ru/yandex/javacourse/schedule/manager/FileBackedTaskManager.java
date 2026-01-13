@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
+
 import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.*;
@@ -121,6 +122,42 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         int epicId = super.addNewEpic(epic);
         save();
         return epicId;
+    }
+
+    @Override
+    public void deleteTask(int id) {
+        super.deleteTask(id);
+        save();
+    }
+
+    @Override
+    public void deleteEpic(int id) {
+        super.deleteEpic(id);
+        save();
+    }
+
+    @Override
+    public void deleteSubtask(int id) {
+        super.deleteSubtask(id);
+        save();
+    }
+
+    @Override
+    public void deleteTasks() {
+        super.deleteTasks();
+        save();
+    }
+
+    @Override
+    public void deleteSubtasks() {
+        super.deleteSubtasks();
+        save();
+    }
+
+    @Override
+    public void deleteEpics() {
+        super.deleteEpics();
+        save();
     }
 
     private void save() {
