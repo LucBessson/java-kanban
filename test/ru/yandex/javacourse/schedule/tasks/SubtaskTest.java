@@ -1,6 +1,7 @@
 package ru.yandex.javacourse.schedule.tasks;
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.exceptions.NotFoundException;
 import ru.yandex.javacourse.schedule.manager.Managers;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
 
@@ -28,8 +29,7 @@ public class SubtaskTest {
     public void testSubtaskNotAddedWithoutEpic() {
         TaskManager manager = Managers.getDefault();
         Subtask subtask = new Subtask(1, "Subtask 1", "Testing subtask 1", TaskStatus.NEW, 1);
-        Integer id = manager.addNewSubtask(subtask);
-        assertNull(id, "subtask should not be added without Epic");
+        assertThrows(NotFoundException.class, () -> manager.addNewSubtask(subtask), "subtask should not be added without Epic");
     }
 
 

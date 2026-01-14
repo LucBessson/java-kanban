@@ -38,6 +38,10 @@ public class Epic extends Task {
         return endTime;
     }
 
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public String toFileString() {
         String end = (endTime != null) ? endTime.toString() : "???";
@@ -70,11 +74,6 @@ public class Epic extends Task {
     public String toString() {
         return "Epic{" + "id=" + id + ", name='" + name + '\'' + ", status=" + status + ", description='" + description + '\'' + ", subtaskIds=" + subtaskIds + '}';
     }
-
-    public void setEndTime(LocalDateTime endTime) {
-            this.endTime = endTime;
-    }
-
 
 
 }

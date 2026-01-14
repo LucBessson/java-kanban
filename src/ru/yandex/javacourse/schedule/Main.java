@@ -5,7 +5,9 @@ import ru.yandex.javacourse.schedule.manager.TaskManager;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
+
 import java.util.List;
+
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
 public class Main {
@@ -158,7 +160,6 @@ public class Main {
 
 
     }
-
 
     private static void printHistory(List<Task> history, String title) {
         System.out.println("------------ " + title + " ------------");
