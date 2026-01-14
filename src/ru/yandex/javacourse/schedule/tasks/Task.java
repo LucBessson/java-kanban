@@ -42,7 +42,8 @@ public class Task {
 
     public LocalDateTime getEndTime() {
         LocalDateTime endTime;
-        if (startTime == null && duration == null) return null;
+        if (startTime == null && duration == null)
+            return null;
         return startTime.plus(duration);
     }
 
@@ -50,8 +51,18 @@ public class Task {
         return startTime;
     }
 
+    public void setStartTime(LocalDateTime startTime) {
+        if (isInManager && type != TaskType.epic)
+            throw new IllegalStateException("нельзя установить startTime, задача уже находится в менеджере");
+        this.startTime = startTime;
+    }
+
     public Duration getDuration() {
         return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
     }
 
     public String toFileString() {
@@ -121,14 +132,5 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" + "id=" + id + ", name='" + name + '\'' + ", status='" + status + '\'' + ", description='" + description + '\'' + '}';
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        if (isInManager && type != TaskType.epic) throw new IllegalStateException("нельзя установить startTime, задача уже находится в менеджере");
-        this.startTime = startTime;
-    }
-
-    public void setDuration(Duration duration) {
-        this.duration = duration;
     }
 }

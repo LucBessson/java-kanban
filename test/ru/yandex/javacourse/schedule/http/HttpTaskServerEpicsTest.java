@@ -1,7 +1,9 @@
 package ru.yandex.javacourse.schedule.http;
 
 import com.google.gson.Gson;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.http.handlers.util.GsonFactory;
 import ru.yandex.javacourse.schedule.manager.InMemoryTaskManager;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
@@ -18,10 +20,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HttpTaskServerEpicsTest {
-
     private TaskManager manager;
     private HttpTaskServer server;
     private Gson gson;
@@ -63,11 +65,7 @@ class HttpTaskServerEpicsTest {
         Epic epic = new Epic("Old name", "Old description");
         manager.addNewEpic(epic);
 
-        Epic updated = new Epic(
-                epic.getId(),
-                "New name",
-                "New description"
-        );
+        Epic updated = new Epic(epic.getId(), "New name", "New description");
 
         HttpResponse<String> response = sendPost("/epics", updated);
 
@@ -123,14 +121,7 @@ class HttpTaskServerEpicsTest {
         Epic epic = new Epic("Epic", "Desc");
         manager.addNewEpic(epic);
 
-        Subtask subtask = new Subtask(
-                "Sub",
-                "Sub desc",
-                TaskStatus.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(5),
-                epic.getId()
-        );
+        Subtask subtask = new Subtask("Sub", "Sub desc", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(5), epic.getId());
         manager.addNewSubtask(subtask);
 
         HttpResponse<String> response = sendDelete("/epics/" + epic.getId());
@@ -168,18 +159,10 @@ class HttpTaskServerEpicsTest {
         Epic epic = new Epic("Epic", "Desc");
         manager.addNewEpic(epic);
 
-        Subtask subtask = new Subtask(
-                "Sub",
-                "Sub desc",
-                TaskStatus.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(10),
-                epic.getId()
-        );
+        Subtask subtask = new Subtask("Sub", "Sub desc", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10), epic.getId());
         manager.addNewSubtask(subtask);
 
-        HttpResponse<String> response =
-                sendGet("/epics/" + epic.getId() + "/subtasks");
+        HttpResponse<String> response = sendGet("/epics/" + epic.getId() + "/subtasks");
 
         assertEquals(200, response.statusCode());
 
@@ -192,37 +175,25 @@ class HttpTaskServerEpicsTest {
     // helpers
     // ======================
 
-    private HttpResponse<String> sendPost(String path, Object body)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendPost(String path, Object body) throws IOException, InterruptedException {
 
         String json = gson.toJson(body);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).POST(HttpRequest.BodyPublishers.ofString(json)).build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendGet(String path)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendGet(String path) throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).GET().build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendDelete(String path)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendDelete(String path) throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .DELETE()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).DELETE().build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }

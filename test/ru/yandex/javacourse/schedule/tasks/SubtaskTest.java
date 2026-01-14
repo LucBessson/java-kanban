@@ -29,11 +29,7 @@ public class SubtaskTest {
     public void testSubtaskNotAddedWithoutEpic() {
         TaskManager manager = Managers.getDefault();
         Subtask subtask = new Subtask(1, "Subtask 1", "Testing subtask 1", TaskStatus.NEW, 1);
-        assertThrows(
-                NotFoundException.class,
-                () -> manager.addNewSubtask(subtask),
-                "subtask should not be added without Epic"
-        );
+        assertThrows(NotFoundException.class, () -> manager.addNewSubtask(subtask), "subtask should not be added without Epic");
     }
 
 

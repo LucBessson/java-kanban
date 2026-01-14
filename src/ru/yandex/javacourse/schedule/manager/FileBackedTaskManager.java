@@ -1,6 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-
 import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.*;
@@ -81,7 +80,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String description = lines[4];
         LocalDateTime startTime = lines[5].equals("???") ? null : LocalDateTime.parse(lines[5]);
         Duration duration = lines[6].equals("???") ? null : Duration.ofMinutes(Long.parseLong(lines[6]));
-                switch (type) {
+        switch (type) {
             case task: {
                 Task task = new Task(id, name, description, status, startTime, duration);
                 super.addFileTask(task);

@@ -1,7 +1,6 @@
 package ru.yandex.javacourse.schedule.exceptions;
 
 public class NotFoundException extends RuntimeException {
-
     public NotFoundException() {
         super();
     }

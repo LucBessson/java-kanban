@@ -24,16 +24,12 @@ public class Subtask extends Task {
         this.id = id;
     }
 
-
-
     public Subtask(String name, String description, TaskStatus status, int epicId) {
         super(name, description, status);
         this.epicId = epicId;
         this.type = TaskType.subTask;
 
     }
-
-
 
     @Override
     public String toFileString() {
@@ -47,12 +43,6 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{" +
-                "id=" + id +
-                ", epicId=" + epicId +
-                ", name='" + name + '\'' +
-                ", status=" + status +
-                ", description='" + description + '\'' +
-                '}';
+        return "Subtask{" + "id=" + id + ", epicId=" + epicId + ", name='" + name + '\'' + ", status=" + status + ", description='" + description + '\'' + '}';
     }
 }

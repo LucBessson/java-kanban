@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.http.handlers.util.GsonFactory;
 import ru.yandex.javacourse.schedule.manager.InMemoryTaskManager;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
-import ru.yandex.javacourse.schedule.tasks.*;
+import ru.yandex.javacourse.schedule.tasks.Epic;
+import ru.yandex.javacourse.schedule.tasks.Subtask;
+import ru.yandex.javacourse.schedule.tasks.Task;
+import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,10 +21,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HttpTaskManagerPrioritizedTest {
-
     TaskManager manager = new InMemoryTaskManager();
     HttpTaskServer server = new HttpTaskServer(manager);
     Gson gson = GsonFactory.create();
@@ -45,13 +48,9 @@ public class HttpTaskManagerPrioritizedTest {
 
     @Test
     void shouldReturnEmptyListIfNoTasks() throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/prioritized"))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/prioritized")).GET().build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
 
@@ -61,25 +60,14 @@ public class HttpTaskManagerPrioritizedTest {
 
     @Test
     void shouldReturnTasksSortedByStartTime() throws IOException, InterruptedException {
-        Task task1 = new Task("Task 1", "Desc",
-                TaskStatus.NEW,
-                LocalDateTime.of(2024, 1, 1, 10, 0),
-                Duration.ofMinutes(30));
+        Task task1 = new Task("Task 1", "Desc", TaskStatus.NEW, LocalDateTime.of(2024, 1, 1, 10, 0), Duration.ofMinutes(30));
 
-        Task task2 = new Task("Task 2", "Desc",
-                TaskStatus.NEW,
-                LocalDateTime.of(2024, 1, 1, 8, 0),
-                Duration.ofMinutes(30));
+        Task task2 = new Task("Task 2", "Desc", TaskStatus.NEW, LocalDateTime.of(2024, 1, 1, 8, 0), Duration.ofMinutes(30));
 
         manager.addNewTask(task1);
         manager.addNewTask(task2);
 
-        HttpResponse<String> response =
-                client.send(HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/prioritized"))
-                                .GET()
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/prioritized")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         List<Task> tasks = gson.fromJson(response.body(), List.class);
 
@@ -91,12 +79,7 @@ public class HttpTaskManagerPrioritizedTest {
         Task task = new Task("Task", "Desc", TaskStatus.NEW);
         manager.addNewTask(task);
 
-        HttpResponse<String> response =
-                client.send(HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/prioritized"))
-                                .GET()
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/prioritized")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         List<Task> tasks = gson.fromJson(response.body(), List.class);
         assertTrue(tasks.isEmpty());
@@ -107,23 +90,11 @@ public class HttpTaskManagerPrioritizedTest {
         Epic epic = new Epic("Epic", "Desc");
         manager.addNewEpic(epic);
 
-        Subtask subtask = new Subtask(
-                "Sub",
-                "Desc",
-                TaskStatus.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(15),
-                epic.getId()
-        );
+        Subtask subtask = new Subtask("Sub", "Desc", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(15), epic.getId());
 
         manager.addNewSubtask(subtask);
 
-        HttpResponse<String> response =
-                client.send(HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/prioritized"))
-                                .GET()
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/prioritized")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         List<Task> tasks = gson.fromJson(response.body(), List.class);
         assertEquals(1, tasks.size());
@@ -134,12 +105,7 @@ public class HttpTaskManagerPrioritizedTest {
         Epic epic = new Epic("Epic", "Desc");
         manager.addNewEpic(epic);
 
-        HttpResponse<String> response =
-                client.send(HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/prioritized"))
-                                .GET()
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/prioritized")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         List<Task> tasks = gson.fromJson(response.body(), List.class);
         assertTrue(tasks.isEmpty());

@@ -1,6 +1,9 @@
 package ru.yandex.javacourse.schedule.http;
+
 import com.google.gson.Gson;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.http.handlers.util.GsonFactory;
 import ru.yandex.javacourse.schedule.manager.InMemoryTaskManager;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
@@ -16,10 +19,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HttpTaskServerTasksTest {
-
     private TaskManager manager;
     private HttpTaskServer server;
     private Gson gson;
@@ -45,13 +48,7 @@ class HttpTaskServerTasksTest {
 
     @Test
     void shouldCreateTask() throws IOException, InterruptedException {
-        Task task = new Task(
-                "Task 1",
-                "Description",
-                TaskStatus.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(10)
-        );
+        Task task = new Task("Task 1", "Description", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
 
         HttpResponse<String> response = sendPost("/tasks", task);
 
@@ -64,19 +61,10 @@ class HttpTaskServerTasksTest {
 
     @Test
     void shouldUpdateTask() throws IOException, InterruptedException {
-        Task task = new Task(
-                "Old name",
-                "Description",
-                TaskStatus.NEW
-        );
+        Task task = new Task("Old name", "Description", TaskStatus.NEW);
         manager.addNewTask(task);
 
-        Task updated = new Task(
-                task.getId(),
-                "New name",
-                "Updated description",
-                TaskStatus.IN_PROGRESS
-        );
+        Task updated = new Task(task.getId(), "New name", "Updated description", TaskStatus.IN_PROGRESS);
 
         HttpResponse<String> response = sendPost("/tasks", updated);
 
@@ -89,21 +77,9 @@ class HttpTaskServerTasksTest {
 
     @Test
     void shouldReturn406WhenTasksIntersect() throws IOException, InterruptedException {
-        Task t1 = new Task(
-                "Task 1",
-                "Desc",
-                TaskStatus.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(10)
-        );
+        Task t1 = new Task("Task 1", "Desc", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
 
-        Task t2 = new Task(
-                "Task 2",
-                "Desc",
-                TaskStatus.NEW,
-                LocalDateTime.now().plusMinutes(5),
-                Duration.ofMinutes(10)
-        );
+        Task t2 = new Task("Task 2", "Desc", TaskStatus.NEW, LocalDateTime.now().plusMinutes(5), Duration.ofMinutes(10));
 
         sendPost("/tasks", t1);
         HttpResponse<String> response = sendPost("/tasks", t2);
@@ -186,37 +162,25 @@ class HttpTaskServerTasksTest {
     // helpers
     // ======================
 
-    private HttpResponse<String> sendPost(String path, Object body)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendPost(String path, Object body) throws IOException, InterruptedException {
 
         String json = gson.toJson(body);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).POST(HttpRequest.BodyPublishers.ofString(json)).build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendGet(String path)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendGet(String path) throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).GET().build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendDelete(String path)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendDelete(String path) throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .DELETE()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).DELETE().build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }

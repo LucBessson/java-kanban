@@ -1,11 +1,15 @@
 package ru.yandex.javacourse.schedule.http;
 
 import com.google.gson.Gson;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.http.handlers.util.GsonFactory;
 import ru.yandex.javacourse.schedule.manager.InMemoryTaskManager;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
-import ru.yandex.javacourse.schedule.tasks.*;
+import ru.yandex.javacourse.schedule.tasks.Epic;
+import ru.yandex.javacourse.schedule.tasks.Subtask;
+import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,10 +20,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HttpTaskServerSubtasksTest {
-
     private TaskManager manager;
     private HttpTaskServer server;
     private Gson gson;
@@ -65,15 +69,7 @@ class HttpTaskServerSubtasksTest {
         Subtask subtask = createSubtask(epic.getId());
         manager.addNewSubtask(subtask);
 
-        Subtask updated = new Subtask(
-                subtask.getId(),
-                "Updated name",
-                "Updated desc",
-                TaskStatus.IN_PROGRESS,
-                subtask.getStartTime(),
-                subtask.getDuration(),
-                epic.getId()
-        );
+        Subtask updated = new Subtask(subtask.getId(), "Updated name", "Updated desc", TaskStatus.IN_PROGRESS, subtask.getStartTime(), subtask.getDuration(), epic.getId());
 
         HttpResponse<String> response = sendPost("/subtasks", updated);
 
@@ -98,14 +94,7 @@ class HttpTaskServerSubtasksTest {
         Subtask s1 = createSubtask(epic.getId());
         manager.addNewSubtask(s1);
 
-        Subtask s2 = new Subtask(
-                "Conflict",
-                "Conflict desc",
-                TaskStatus.NEW,
-                s1.getStartTime(),
-                s1.getDuration(),
-                epic.getId()
-        );
+        Subtask s2 = new Subtask("Conflict", "Conflict desc", TaskStatus.NEW, s1.getStartTime(), s1.getDuration(), epic.getId());
 
         HttpResponse<String> response = sendPost("/subtasks", s2);
 
@@ -134,8 +123,7 @@ class HttpTaskServerSubtasksTest {
         Subtask subtask = createSubtask(epic.getId());
         manager.addNewSubtask(subtask);
 
-        HttpResponse<String> response =
-                sendGet("/subtasks/" + subtask.getId());
+        HttpResponse<String> response = sendGet("/subtasks/" + subtask.getId());
 
         assertEquals(200, response.statusCode());
 
@@ -159,8 +147,7 @@ class HttpTaskServerSubtasksTest {
         Subtask subtask = createSubtask(epic.getId());
         manager.addNewSubtask(subtask);
 
-        HttpResponse<String> response =
-                sendDelete("/subtasks/" + subtask.getId());
+        HttpResponse<String> response = sendDelete("/subtasks/" + subtask.getId());
 
         assertEquals(200, response.statusCode());
         assertTrue(manager.getSubtasks().isEmpty());
@@ -190,47 +177,28 @@ class HttpTaskServerSubtasksTest {
     // ======================
 
     private Subtask createSubtask(int epicId) {
-        return new Subtask(
-                "Subtask",
-                "Subtask description",
-                TaskStatus.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(10),
-                epicId
-        );
+        return new Subtask("Subtask", "Subtask description", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10), epicId);
     }
 
-    private HttpResponse<String> sendPost(String path, Object body)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendPost(String path, Object body) throws IOException, InterruptedException {
 
         String json = gson.toJson(body);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).POST(HttpRequest.BodyPublishers.ofString(json)).build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendGet(String path)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendGet(String path) throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).GET().build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendDelete(String path)
-            throws IOException, InterruptedException {
+    private HttpResponse<String> sendDelete(String path) throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + path))
-                .DELETE()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080" + path)).DELETE().build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }

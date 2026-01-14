@@ -1,18 +1,22 @@
 package ru.yandex.javacourse.schedule.http.handlers;
+
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import ru.yandex.javacourse.schedule.http.handlers.util.GsonFactory;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class SubtaskHandler extends BaseHttpHandler {
     private final TaskManager manager;
     private final Gson gson = GsonFactory.create();
+
     public SubtaskHandler(TaskManager manager) {
         this.manager = manager;
     }
+
     @Override
     protected void handleGet(HttpExchange h) throws IOException {
         String[] path = h.getRequestURI().getPath().split("/");

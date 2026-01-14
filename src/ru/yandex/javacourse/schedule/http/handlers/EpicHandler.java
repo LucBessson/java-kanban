@@ -1,9 +1,11 @@
 package ru.yandex.javacourse.schedule.http.handlers;
+
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import ru.yandex.javacourse.schedule.http.handlers.util.GsonFactory;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
 import ru.yandex.javacourse.schedule.tasks.Epic;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -18,7 +20,7 @@ public class EpicHandler extends BaseHttpHandler {
     protected void handleDelete(HttpExchange h) throws IOException {
         String[] splitStrings = h.getRequestURI().getPath().split("/");
 
-        if(splitStrings.length == 2) {
+        if (splitStrings.length == 2) {
             manager.deleteEpics();
             h.sendResponseHeaders(200, 0);
             return;
@@ -45,13 +47,13 @@ public class EpicHandler extends BaseHttpHandler {
     protected void handleGet(HttpExchange h) throws IOException {
         String[] splitStrings = h.getRequestURI().getPath().split("/");
 
-        if(splitStrings.length == 2) {
+        if (splitStrings.length == 2) {
             String jsonResponse = gson.toJson(manager.getEpics());
             sendText(h, jsonResponse);
             return;
         }
         int id = Integer.parseInt(splitStrings[2]);
-        if(splitStrings.length == 3) {
+        if (splitStrings.length == 3) {
             Epic epic = manager.getEpic(id); // если нет — NotFoundException
             sendText(h, gson.toJson(epic));
             return;

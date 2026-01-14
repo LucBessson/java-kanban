@@ -1,8 +1,10 @@
 package ru.yandex.javacourse.schedule.http;
+
 import com.sun.net.httpserver.HttpServer;
 import ru.yandex.javacourse.schedule.http.handlers.*;
 import ru.yandex.javacourse.schedule.manager.Managers;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -22,19 +24,19 @@ public class HttpTaskServer {
         server.createContext("/prioritized", new PrioritizedHandler(manager));
     }
 
+    public static void main(String[] args) throws IOException {
+        TaskManager manager = Managers.getDefault();
+        HttpTaskServer server = new HttpTaskServer(manager);
+        server.start();
+        System.out.println("Server started on port " + PORT);
+    }
+
     public void start() {
         server.start();
     }
 
     public void stop() {
         server.stop(0);
-    }
-
-    public static void main(String[] args) throws IOException {
-        TaskManager manager = Managers.getDefault();
-        HttpTaskServer server = new HttpTaskServer(manager);
-        server.start();
-        System.out.println("Server started on port " + PORT);
     }
 }
 

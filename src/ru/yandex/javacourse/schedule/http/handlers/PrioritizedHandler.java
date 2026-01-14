@@ -8,7 +8,6 @@ import ru.yandex.javacourse.schedule.manager.TaskManager;
 import java.io.IOException;
 
 public class PrioritizedHandler extends BaseHttpHandler {
-
     private final TaskManager manager;
     private final Gson gson = GsonFactory.create();
 

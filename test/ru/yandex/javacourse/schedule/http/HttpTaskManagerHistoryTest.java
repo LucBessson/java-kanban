@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HttpTaskManagerHistoryTest {
-
     TaskManager manager = new InMemoryTaskManager();
     HttpTaskServer server = new HttpTaskServer(manager);
     Gson gson = GsonFactory.create();
@@ -49,13 +48,9 @@ public class HttpTaskManagerHistoryTest {
     void shouldReturnEmptyHistory() throws IOException, InterruptedException {
         URI url = URI.create("http://localhost:8080/history");
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(url)
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().GET().uri(url).build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
 
@@ -65,65 +60,33 @@ public class HttpTaskManagerHistoryTest {
 
     @Test
     void shouldAddTaskToHistory() throws IOException, InterruptedException {
-        Task task = new Task(
-                "Task",
-                "Desc",
-                TaskStatus.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(10)
-        );
+        Task task = new Task("Task", "Desc", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
         manager.addNewTask(task);
 
         // запрос задачи → попадает в историю
-        client.send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/tasks/" + task.getId()))
-                        .GET()
-                        .build(),
-                HttpResponse.BodyHandlers.ofString()
-        );
+        client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/tasks/" + task.getId())).GET().build(), HttpResponse.BodyHandlers.ofString());
 
-        HttpResponse<String> historyResponse =
-                client.send(
-                        HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/history"))
-                                .GET()
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString()
-                );
+        HttpResponse<String> historyResponse = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/history")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
-        List<Task> history =
-                gson.fromJson(historyResponse.body(), List.class);
+        List<Task> history = gson.fromJson(historyResponse.body(), List.class);
 
         assertEquals(1, history.size());
     }
 
     @Test
     void shouldKeepCorrectOrder() throws IOException, InterruptedException {
-        Task task1 = new Task("T1", "D1", TaskStatus.NEW,
-                 LocalDateTime.now(), Duration.ofMinutes(10));
+        Task task1 = new Task("T1", "D1", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
 
-        Task task2 = new Task("T2", "D2", TaskStatus.NEW,
-                 LocalDateTime.now().plusMinutes(20), Duration.ofMinutes(10));
+        Task task2 = new Task("T2", "D2", TaskStatus.NEW, LocalDateTime.now().plusMinutes(20), Duration.ofMinutes(10));
 
         manager.addNewTask(task1);
         manager.addNewTask(task2);
 
-        client.send(HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/tasks/" + task1.getId()))
-                        .GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+        client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/tasks/" + task1.getId())).GET().build(), HttpResponse.BodyHandlers.ofString());
 
-        client.send(HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/tasks/" + task2.getId()))
-                        .GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+        client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/tasks/" + task2.getId())).GET().build(), HttpResponse.BodyHandlers.ofString());
 
-        HttpResponse<String> response =
-                client.send(HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/history"))
-                                .GET().build(),
-                        HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/history")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         List<Task> history = gson.fromJson(response.body(), List.class);
 
@@ -132,35 +95,20 @@ public class HttpTaskManagerHistoryTest {
 
     @Test
     void shouldMoveTaskToEndIfRequestedAgain() throws IOException, InterruptedException {
-        Task task1 = new Task("T1", "D1", TaskStatus.NEW,
-                LocalDateTime.now(), Duration.ofMinutes(10));
+        Task task1 = new Task("T1", "D1", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
 
-        Task task2 = new Task("T2", "D2", TaskStatus.NEW,
-                LocalDateTime.now().plusMinutes(20), Duration.ofMinutes(10));
+        Task task2 = new Task("T2", "D2", TaskStatus.NEW, LocalDateTime.now().plusMinutes(20), Duration.ofMinutes(10));
 
         manager.addNewTask(task1);
         manager.addNewTask(task2);
 
-        client.send(HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/tasks/" + task1.getId()))
-                        .GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+        client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/tasks/" + task1.getId())).GET().build(), HttpResponse.BodyHandlers.ofString());
 
-        client.send(HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/tasks/" + task2.getId()))
-                        .GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+        client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/tasks/" + task2.getId())).GET().build(), HttpResponse.BodyHandlers.ofString());
 
-        client.send(HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/tasks/" + task1.getId()))
-                        .GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+        client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/tasks/" + task1.getId())).GET().build(), HttpResponse.BodyHandlers.ofString());
 
-        HttpResponse<String> response =
-                client.send(HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/history"))
-                                .GET().build(),
-                        HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/history")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         List<Task> history = gson.fromJson(response.body(), List.class);
 
@@ -169,23 +117,15 @@ public class HttpTaskManagerHistoryTest {
 
     @Test
     void deletedTaskShouldDisappearFromHistory() throws IOException, InterruptedException {
-        Task task = new Task("Task", "Desc", TaskStatus.NEW,
-                LocalDateTime.now(), Duration.ofMinutes(10));
+        Task task = new Task("Task", "Desc", TaskStatus.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
 
         manager.addNewTask(task);
 
-        client.send(HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/tasks/" + task.getId()))
-                        .GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+        client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/tasks/" + task.getId())).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         manager.deleteTask(task.getId());
 
-        HttpResponse<String> response =
-                client.send(HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:8080/history"))
-                                .GET().build(),
-                        HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/history")).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         List<Task> history = gson.fromJson(response.body(), List.class);
 
