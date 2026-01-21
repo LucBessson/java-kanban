@@ -80,7 +80,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String description = lines[4];
         LocalDateTime startTime = lines[5].equals("???") ? null : LocalDateTime.parse(lines[5]);
         Duration duration = lines[6].equals("???") ? null : Duration.ofMinutes(Long.parseLong(lines[6]));
-                switch (type) {
+        switch (type) {
             case task: {
                 Task task = new Task(id, name, description, status, startTime, duration);
                 super.addFileTask(task);
@@ -121,6 +121,42 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         int epicId = super.addNewEpic(epic);
         save();
         return epicId;
+    }
+
+    @Override
+    public void deleteTask(int id) {
+        super.deleteTask(id);
+        save();
+    }
+
+    @Override
+    public void deleteEpic(int id) {
+        super.deleteEpic(id);
+        save();
+    }
+
+    @Override
+    public void deleteSubtask(int id) {
+        super.deleteSubtask(id);
+        save();
+    }
+
+    @Override
+    public void deleteTasks() {
+        super.deleteTasks();
+        save();
+    }
+
+    @Override
+    public void deleteSubtasks() {
+        super.deleteSubtasks();
+        save();
+    }
+
+    @Override
+    public void deleteEpics() {
+        super.deleteEpics();
+        save();
     }
 
     private void save() {

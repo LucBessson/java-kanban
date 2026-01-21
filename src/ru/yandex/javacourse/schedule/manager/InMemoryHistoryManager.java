@@ -4,7 +4,6 @@ import ru.yandex.javacourse.schedule.tasks.Task;
 
 import java.util.List;
 
-
 public class InMemoryHistoryManager implements HistoryManager {
     private final HistoryLinkedList historyLinkedList = new HistoryLinkedList();
 

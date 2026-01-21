@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
+import ru.yandex.javacourse.schedule.exceptions.NotFoundException;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
@@ -28,8 +29,7 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean hasAnyCrossing() {
         List<Task> tasks = getPrioritizedTasks();
 
-        return IntStream.range(0, tasks.size() - 1)
-                .anyMatch(i -> isCrossing(tasks.get(i), tasks.get(i + 1)));
+        return IntStream.range(0, tasks.size() - 1).anyMatch(i -> isCrossing(tasks.get(i), tasks.get(i + 1)));
     }
 
     @Override
@@ -51,16 +51,16 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Subtask> getEpicSubtasks(int epicId) {
         Epic epic = epics.get(epicId);
         if (epic == null) {
-            return null;
+            throw new NotFoundException("Epic not found: " + epicId);
         }
-        return epic.getSubtaskIds().stream()
-                .map(subtasks::get)
-                .collect(Collectors.toList());
+        return epic.getSubtaskIds().stream().map(subtasks::get).collect(Collectors.toList());
     }
 
-    @Override
     public Task getTask(int id) {
-        final Task task = tasks.get(id);
+        Task task = tasks.get(id);
+        if (task == null) {
+            throw new NotFoundException("Task not found: " + id);
+        }
         historyManager.addTask(task);
         return task;
     }
@@ -68,13 +68,19 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtask(int id) {
         final Subtask subtask = subtasks.get(id);
+        if (subtask == null) {
+            throw new NotFoundException("Task not found: " + id);
+        }
         historyManager.addTask(subtask);
         return subtask;
     }
 
     @Override
-    public Epic getEpic(int id) {
-        final Epic epic = epics.get(id);
+    public Epic getEpic(int epicId) {
+        final Epic epic = epics.get(epicId);
+        if (epic == null) {
+            throw new NotFoundException("Epic not found: " + epicId);
+        }
         historyManager.addTask(epic);
         return epic;
     }
@@ -113,6 +119,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     protected int addFileTask(Task task) {
+        if (task.getId() > generatorId)
+            generatorId = task.getId();
         return addTaskCommon(task);
     }
 
@@ -123,40 +131,59 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     protected int addFileEpic(Epic epic) {
+        if (epic.getId() > generatorId)
+            generatorId = epic.getId();
         return addEpicCommon(epic);
     }
 
     @Override
     public Integer addNewSubtask(Subtask subtask) {
-        Epic epic = epics.get(subtask.getEpicId());
+        int epicId = subtask.getEpicId();
+        Epic epic = epics.get(epicId);
         if (epic == null) {
-            return null;
+            throw new NotFoundException("Epic not found: " + epicId);
         }
         subtask.setId(++generatorId);
         return addSubtaskCommon(subtask, epic);
     }
 
     public Integer addFileSubtask(Subtask subtask) {
-        Epic epic = epics.get(subtask.getEpicId());
+        int epicId = subtask.getEpicId();
+        Epic epic = epics.get(epicId);
         if (epic == null) {
-            return null;
+            throw new NotFoundException("Epic not found: " + epicId);
         }
+        if (subtask.getId() > generatorId)
+            generatorId = subtask.getId();
         return addSubtaskCommon(subtask, epic);
     }
 
     @Override
     public void updateTask(Task task) {
         final int id = task.getId();
-        final Task savedTask = tasks.get(id);
-        if (savedTask == null) {
-            return;
+        final Task old = tasks.get(id);
+        if (old == null) {
+            throw new NotFoundException("Task not found: " + id);
         }
+        timedTasks.remove(old);
+        addToTimedTasks(task);
+        if (hasAnyCrossing()) {
+            timedTasks.remove(task);
+            addToTimedTasks(old);
+            throw new IllegalStateException("Задачи пересекаются по времени");
+        }
+
+        task.setInManager();
         tasks.put(id, task);
     }
 
     @Override
     public void updateEpic(Epic epic) {
+        int epicId = epic.getId();
         final Epic savedEpic = epics.get(epic.getId());
+        if (savedEpic == null) {
+            throw new NotFoundException("Epic not found: " + epicId);
+        }
         savedEpic.setName(epic.getName());
         savedEpic.setDescription(epic.getDescription());
     }
@@ -164,22 +191,34 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         final int id = subtask.getId();
+        final Subtask oldSubtask = subtasks.get(id);
+        if (oldSubtask == null) {
+            throw new NotFoundException("Subtask not found: " + id);
+        }
         final int epicId = subtask.getEpicId();
-        final Subtask savedSubtask = subtasks.get(id);
-        if (savedSubtask == null) {
-            return;
+        final Epic savedEpic = epics.get(epicId);
+        if (savedEpic == null) {
+            throw new NotFoundException("Epic not found: " + epicId);
         }
-        final Epic epic = epics.get(epicId);
-        if (epic == null) {
-            return;
+        timedTasks.remove(oldSubtask);
+        addToTimedTasks(subtask);
+        if (hasAnyCrossing()) {
+            timedTasks.remove(subtask);
+            addToTimedTasks(oldSubtask);
+            throw new IllegalStateException("Подзадачи пересекаются по времени");
         }
+        subtask.setInManager();
         subtasks.put(id, subtask);
+        updateEpicTime(savedEpic);
         updateEpicStatus(epicId);
     }
 
     @Override
     public void deleteTask(int id) {
         Task task = tasks.remove(id);
+        if (task == null) {
+            throw new NotFoundException("Task not found: " + id);
+        }
         timedTasks.remove(task);
         historyManager.remove(id);
     }
@@ -187,25 +226,32 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteEpic(int id) {
         Epic epic = epics.remove(id);
+        if (epic == null) {
+            throw new NotFoundException("Epic not found: " + id);
+        }
         historyManager.remove(id);
-
-        epic.getSubtaskIds().stream()
-                .peek(historyManager::remove)
-                .peek(timedTasks::remove)
-                .forEach(subtasks::remove);
+        for (Integer subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.remove(subtaskId);
+            if (subtask != null) {
+                timedTasks.remove(subtask);
+                historyManager.remove(subtaskId);
+            }
+        }
     }
 
     @Override
     public void deleteSubtask(int id) {
         Subtask subtask = subtasks.remove(id);
         if (subtask == null) {
-            return;
+            throw new NotFoundException("subtask not found: " + id);
         }
         timedTasks.remove(subtask);
         Epic epic = epics.get(subtask.getEpicId());
         epic.removeSubtask(id);
         historyManager.remove(id);
+        updateEpicTime(epic);
         updateEpicStatus(epic.getId());
+
     }
 
     @Override
@@ -216,9 +262,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubtasks() {
-        epics.values().stream()
-                .peek(Epic::cleanSubtaskIds)
-                .forEach(epic -> updateEpicStatus(epic.getId()));
+        epics.values().stream().peek(Epic::cleanSubtaskIds).forEach(epic -> updateEpicStatus(epic.getId()));
 
         new ArrayList<>(subtasks.keySet()).stream().forEach(this::deleteSubtask);
 
@@ -254,29 +298,13 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setEndTime(null);
             return;
         }
-        List<Subtask> subs = subIds.stream()
-                .map(subtasks::get)
-                .toList();
+        List<Subtask> subs = subIds.stream().map(subtasks::get).toList();
 
-        epic.setDuration(
-                subs.stream()
-                        .map(Subtask::getDuration)
-                        .filter(Objects::nonNull)
-                        .reduce(Duration.ZERO, Duration::plus));
+        epic.setDuration(subs.stream().map(Subtask::getDuration).filter(Objects::nonNull).reduce(Duration.ZERO, Duration::plus));
 
-        epic.setStartTime(
-                subs.stream()
-                        .map(Subtask::getStartTime)
-                        .filter(Objects::nonNull)
-                        .min(LocalDateTime::compareTo)
-                        .orElse(null));
+        epic.setStartTime(subs.stream().map(Subtask::getStartTime).filter(Objects::nonNull).min(LocalDateTime::compareTo).orElse(null));
 
-        epic.setEndTime(
-                subs.stream()
-                        .map(Subtask::getEndTime)
-                        .filter(Objects::nonNull)
-                        .max(LocalDateTime::compareTo)
-                        .orElse(null));
+        epic.setEndTime(subs.stream().map(Subtask::getEndTime).filter(Objects::nonNull).max(LocalDateTime::compareTo).orElse(null));
     }
 
     private void updateEpicStatus(int epicId) {
@@ -286,10 +314,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(NEW);
             return;
         }
-        Set<TaskStatus> statuses = epic.getSubtaskIds().stream()
-                .map(subtasks::get)
-                .map(Subtask::getStatus)
-                .collect(Collectors.toSet());
+        Set<TaskStatus> statuses = epic.getSubtaskIds().stream().map(subtasks::get).map(Subtask::getStatus).collect(Collectors.toSet());
 
         // если только NEW
         if (statuses.size() == 1 && statuses.contains(NEW)) {
@@ -315,13 +340,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private Integer addSubtaskCommon(Subtask subtask, Epic epic) {
+        addToTimedTasks(subtask);
+        if (hasAnyCrossing()) {
+            timedTasks.remove(subtask);
+            throw new IllegalStateException("Задачи пересекаются по времени");
+        }
         int id = subtask.getId();
         subtask.setInManager();
         subtasks.put(id, subtask);
         epic.addSubtaskId(id);
         updateEpicTime(epic);
         updateEpicStatus(epic.getId());
-        addToTimedTasks(subtask);
         return id;
     }
 
@@ -333,10 +362,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private int addTaskCommon(Task task) {
+        addToTimedTasks(task);
+        if (hasAnyCrossing()) {
+            timedTasks.remove(task);
+            throw new IllegalStateException("Задачи пересекаются по времени");
+        }
         int id = task.getId();
         task.setInManager();
         tasks.put(id, task);
-        addToTimedTasks(task);
         return id;
     }
 }

@@ -13,10 +13,15 @@ public class Subtask extends Task {
 
     }
 
-    public Subtask(int id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration, int epicId) {
-        this(id, name, description, status, epicId);
+    public Subtask(String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration, int epicId) {
+        this(name, description, status, epicId);
         this.startTime = startTime;
         this.duration = duration;
+    }
+
+    public Subtask(int id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration, int epicId) {
+        this(name, description, status, startTime, duration, epicId);
+        this.id = id;
     }
 
     public Subtask(String name, String description, TaskStatus status, int epicId) {
@@ -25,8 +30,6 @@ public class Subtask extends Task {
         this.type = TaskType.subTask;
 
     }
-
-
 
     @Override
     public String toFileString() {
@@ -40,12 +43,6 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{" +
-                "id=" + id +
-                ", epicId=" + epicId +
-                ", name='" + name + '\'' +
-                ", status=" + status +
-                ", description='" + description + '\'' +
-                '}';
+        return "Subtask{" + "id=" + id + ", epicId=" + epicId + ", name='" + name + '\'' + ", status=" + status + ", description='" + description + '\'' + '}';
     }
 }

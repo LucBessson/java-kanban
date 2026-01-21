@@ -1,6 +1,7 @@
 package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.exceptions.NotFoundException;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
@@ -66,10 +67,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task task = new Task("Test", "Desc", NEW);
         int id = manager.addNewTask(task);
         manager.getTask(id);
-
         manager.deleteTask(id);
-
-        assertNull(manager.getTask(id), "Задача не была удалена.");
+        assertThrows(NotFoundException.class, () -> manager.getTask(id), "Задача не была удалена.");
         assertTrue(manager.getHistory().isEmpty(), "Задача не была удалена из истории.");
     }
 
@@ -79,11 +78,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask sub = createSubtask(epic.getId(), NEW);
         manager.getEpic(epic.getId());
         manager.getSubtask(sub.getId());
-
         manager.deleteEpic(epic.getId());
 
-        assertNull(manager.getEpic(epic.getId()), "Эпик не был удален.");
-        assertNull(manager.getSubtask(sub.getId()), "Подзадача не была удалена.");
+        assertThrows(NotFoundException.class, () -> manager.getEpic(epic.getId()), "Эпик не был удален");
+
+        assertThrows(NotFoundException.class, () -> manager.getSubtask(sub.getId()), "Подзадача не была удалена");
+
         assertFalse(manager.getHistory().contains(epic), "Эпик не удален из истории.");
         assertTrue(manager.getHistory().isEmpty(), "Подзадача не удалена из истории."); // Если было только 2 элемента
 
@@ -133,19 +133,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldReturnNullWhenSubtaskHasNoEpic() {
+    void shouldThrowExceptionWhenSubtaskHasNoEpic() {
         Subtask subtask = new Subtask("Без эпика", "Не привязан", NEW, 9999);
-        Integer id = manager.addNewSubtask(subtask);
-        assertNull(id, "Подзадача должна возвращать null при отсутствии эпика.");
+
+        assertThrows(NotFoundException.class, () -> manager.addNewSubtask(subtask), "Подзадача должна выкидывать исключение при отсутствии эпика.");
     }
 
     @Test
-    void shouldReturnEmptyListForNonExistentEpicSubtasks() {
-        assertNull(manager.getEpicSubtasks(9999), "Должен вернуть null для несуществующего Epic.");
+    void shouldThrowsExceptionForNonExistentEpicSubtasks() {
+        assertThrows(NotFoundException.class, () -> manager.getEpicSubtasks(9999), " должен выкидывать исключение при отсутствии эпика.");
     }
 
     @Test
-    void tasksShouldBeSortedByStartTimeThenById() {
+    void tasksShouldBeSortedByStartTime() {
         InMemoryTaskManager manager = new InMemoryTaskManager();
 
         Task t1 = new Task("A", "t1", TaskStatus.NEW);
@@ -157,7 +157,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         t2.setDuration(Duration.ofMinutes(30));
 
         Task t3 = new Task("C", "t3", TaskStatus.NEW);
-        t3.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0)); // same start as t1
+        t3.setStartTime(LocalDateTime.of(2025, 1, 1, 11, 0)); // same start as t1
         t3.setDuration(Duration.ofMinutes(15));
 
         int id2 = manager.addNewTask(t2); // earliest start (09:00) -> id 1
@@ -182,7 +182,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldDetectAnyCrossingInPrioritizedList() {
+    void shouldNotBeAnyCrossingInPrioritizedList() {
         Task t1 = new Task("T1", "D1", NEW);
         t1.setStartTime(LocalDateTime.of(2025, 1, 1, 10, 0));
         t1.setDuration(Duration.ofHours(2));
@@ -191,16 +191,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task t2 = new Task("T2", "D2", NEW); // Пересекается с T1
         t2.setStartTime(LocalDateTime.of(2025, 1, 1, 11, 0));
         t2.setDuration(Duration.ofHours(2));
-        manager.addNewTask(t2);
+
+        assertThrows(IllegalStateException.class, () -> manager.addNewTask(t2), "Должны быть обнаружены пересечения между T1 и T2.");
 
         Task t3 = new Task("T3", "D3", NEW); // Не пересекается
         t3.setStartTime(LocalDateTime.of(2025, 1, 1, 14, 0));
         t3.setDuration(Duration.ofHours(1));
         manager.addNewTask(t3);
 
-        assertTrue(manager.hasAnyCrossing(), "Должны быть обнаружены пересечения между T1 и T2.");
-
-        manager.deleteTask(t2.getId());
         assertFalse(manager.hasAnyCrossing(), "Пересечений быть не должно.");
     }
 }
